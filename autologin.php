@@ -3,13 +3,6 @@
 	include_once(dirname(__FILE__)."/database.php");
 	include_once(dirname(__FILE__)."/security.php");
 	
-	/*
-		privs:
-			0 - unregistered
-			1 - user
-			2 - admin
-	*/
-	
 	class Autologin {
 		public function __construct() {
 			global $util, $database, $security;
@@ -19,9 +12,6 @@
 				$_SESSION["username"] = "";
 				$_SESSION["priv"] = 0;
 			}
-	
-			//$security->set_cookie("user", "egg82");
-			//$security->set_cookie("encrypted_pass", "tBnxO6QgGye28DtH8HEpOklNQ+J0");
 	
 			if ($_SESSION["user_id"] == 0 && isset($_COOKIE["user"]) && isset($_COOKIE["encrypted_pass"])) {
 				$user = $database->sanitize($util->sanitize($_COOKIE["user"]));
