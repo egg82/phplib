@@ -1,29 +1,28 @@
 <?php
-	include_once(dirname(__FILE__)."/conf.php");
 	include_once(dirname(__FILE__)."/logger.php");
-	include_once(dirname(__FILE__)."/util.php");
+	require_once(dirname(__FILE__)."/util.php");
 	
 	class Database {
 		private $connection = null;
 		
-		public function __construct($type) {
-			global $conf, $logger, $util;
+		public function __construct($conf) {
+			global $logger, $util;
 			
 			try {
-				if ($type == "mysql") {
-					$this->connection = new \PDO("mysql:host=".$conf->db_host.";dbname=".$conf->db_name, $conf->db_user, $conf->db_pass,
+				if ($conf->type == "mysql") {
+					$this->connection = new \PDO("mysql:host=".$conf->host.";dbname=".$conf->name, $conf->user, $conf->pass,
 						array(
 							\PDO::ATTR_PERSISTENT => true
 						)
 					);
-				} else if ($type == "mssql" || $type == "sybase") {
-					$this->connection = new \PDO($type.":host=".$conf->db_host.";dbname=".$conf->db_name.", ".$conf->db_user.", ".$conf->db_pass,
+				} else if ($conf->type == "mssql" || $conf->type == "sybase") {
+					$this->connection = new \PDO($type.":host=".$conf->host.";dbname=".$conf->name.", ".$conf->user.", ".$conf->pass,
 						array(
 							\PDO::ATTR_PERSISTENT => true
 						)
 					);
-				} else if ($type == "sqlite") {
-					$this->connection = new \PDO("sqlite:".$conf->db_name,
+				} else if ($conf->type == "sqlite") {
+					$this->connection = new \PDO("sqlite:".$conf->name,
 						array(
 							\PDO::ATTR_PERSISTENT => true
 						)
@@ -80,6 +79,4 @@
 			return $this->connection->lastInsertId();
 		}
 	}
-	
-	$database = new Database($conf->db_type);
 ?>

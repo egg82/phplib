@@ -1,6 +1,6 @@
 <?php
-	include_once(dirname(__FILE__)."/conf.php");
-	include_once(dirname(__FILE__)."/util.php");
+	require_once(dirname(__FILE__)."/conf.php");
+	require_once(dirname(__FILE__)."/util.php");
 	
 	class Security {
 		public function __construct() {
@@ -8,16 +8,32 @@
 		}
 		
 		public function pass_hash($password) {
-			global $conf;
+			global $conf, $util;
 			
-			return password_hash($password, PASSWORD_BCRYPT,
-				[
-					'cost' => $conf->hash_cost
-				]
-			);
+			if (extension_loaded("scrypt")) {
+				$salt = $util->secure_random_string(16);
+				return $salt . scrypt($password, $salt, $conf->hash_cost ^ 2, 8, 1, 64);
+			} else {
+				return password_hash($password, PASSWORD_BCRYPT,
+					[
+						'cost' => $conf->hash_cost
+					]
+				);
+			}
 		}
 		public function pass_verify($hash, $password) {
-			return password_verify($password, $hash);
+			global $conf;
+			
+			if (extension_loaded("scrypt")) {
+				if (strlen($hash) <= 16) {
+					return false;
+				}
+				$salt = substr($hash, 0, 16);
+				$crypt = substr($hash, 16);
+				return (scrypt($password, $salt, $conf->hash_cost ^ 2, 8, 1, 64) == $crypt) ? true : false;
+			} else {
+				return password_verify($password, $hash);
+			}
 		}
 		
 		public function generate_key() {
@@ -25,7 +41,7 @@
 			
 			$td = mcrypt_module_open($conf->encrypt_algo, '', $conf->encrypt_mode, '');
 			$ks = mcrypt_enc_get_key_size($td);
-			$key = $util->random_string($ks);
+			$key = $util->secure_random_string($ks);
 			mcrypt_module_close($td);
 			
 			return $key;
@@ -65,7 +81,7 @@
 		public function set_cookie($key, $value) {
 			global $conf;
 			$_COOKIE[$key] = $value;
-			setcookie($key, $value, time() + $conf->cookie_life, "/", "", isset($_SERVER['HTTPS']), true);
+			setcookie($key, $value, time() + $conf->cookie_life, "/", "", $conf->https, true);
 		}
 		public function delete_cookie($key) {
 			unset($_COOKIE[$key]);

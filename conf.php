@@ -1,11 +1,5 @@
 <?php
 	class Conf {
-		public $db_type = "mysql";
-		public $db_host = "127.0.0.1";
-		public $db_user = "root";
-		public $db_pass = "";
-		public $db_name = "web";
-		
 		public $hash_cost = 10; //bcrypt hash cost
 		
 		public $log_type = "stdout log";
@@ -25,12 +19,29 @@
 		public $cookie_life = 604800; //1 week
 		
 		public $hostname = null;
+		public $https = false;
 		
 		public function __construct() {
 			$this->hostname = $_SERVER['HTTP_HOST'];
 			if (is_null($this->hostname) || $this->hostname == "") {
 				$this->hostname = $_SERVER['SERVER_NAME'];
 			}
+			$this->https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? true : false;
+		}
+	}
+	class DbConf {
+		public $type = "mysql";
+		public $host = "127.0.0.1";
+		public $user = "root";
+		public $pass = "";
+		public $name = "web";
+		
+		public function __construct($type, $host, $user, $pass, $name) {
+			$this->type = $type;
+			$this->host = $host;
+			$this->user = $user;
+			$this->pass = $pass;
+			$this->name = $name;
 		}
 	}
 	

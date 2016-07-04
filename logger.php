@@ -1,5 +1,5 @@
 <?php
-	include_once(dirname(__FILE__)."/conf.php");
+	require_once(dirname(__FILE__)."/conf.php");
 	
 	class Logger {
 		public function __construct() {
